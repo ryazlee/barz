@@ -13,4 +13,4 @@ The dev environment uses something called [Expo](https://expo.dev/) which allows
 
 ## References
 * Creating camera using `expo-camera`: [Source](https://github.com/imrohit007/Video-Recording-React-Native-Expo)
-* Using `NavigationController` for `App.tsx`
+* Using `NavigationController` for `App.tsx`: [Source](https://reactnative.dev/docs/navigation)
