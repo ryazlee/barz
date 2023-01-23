@@ -1,39 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { Camera, CameraType, PermissionStatus } from 'expo-camera';
-import { Button, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Button, Image } from 'react-native';
+import { Camera, CameraType } from 'expo-camera';
 import { AVPlaybackStatus, ResizeMode, Video } from 'expo-av';
 
-
-export default function BarzCamera() {
-    const [hasAudioPermission, setHasAudioPremission] = useState(null)
-    const [hasCameraPermission, setHasCameraPremission] = useState(null)
+export default function BarzCamera({ navigation }) {
+    const [hasAudioPermission, setHasAudioPermission] = useState(null);
+    const [hasCameraPermission, setHasCameraPermission] = useState(null);
     const [camera, setCamera] = useState(null);
     const [record, setRecord] = useState(null);
-    const [type, setType] = useState(CameraType.front)
+    const [type, setType] = useState(CameraType.front);
     const video = React.useRef(null);
-    const [status, setStatus] = useState({} as AVPlaybackStatus);
+    const [status, setStatus] = React.useState({} as AVPlaybackStatus);
 
 
     useEffect(() => {
         (async () => {
             const cameraStatus = await Camera.requestCameraPermissionsAsync();
-            setHasCameraPremission(cameraStatus.granted)
+            setHasCameraPermission(cameraStatus.granted)
+
             const audioStatus = await Camera.requestMicrophonePermissionsAsync();
-            setHasAudioPremission(audioStatus.granted)
-
-
+            setHasAudioPermission(audioStatus.granted);
 
         })();
     }, []);
-
 
     const takeVideo = async () => {
         if (camera) {
             const data = await camera.recordAsync({
                 maxDuration: 10
             })
-            setRecord(data.uri)
-            console.log(data.uri)
+            setRecord(data.uri);
+            console.log(data.uri);
         }
     }
 
@@ -42,21 +39,23 @@ export default function BarzCamera() {
     }
 
     if (hasCameraPermission === null || hasAudioPermission === null) {
-        return <View />
+        return <View />;
     }
-
-    // Add error checks here for camera/audio permissions
-
+    if (hasCameraPermission === false || hasAudioPermission === false) {
+        return <Text>No access to camera</Text>;
+    }
     return (
         <View style={{ flex: 1 }}>
-            <Camera
-                ref={ref => setCamera(ref)}
-                type={type}
-                ratio={'4:3'}
-                style={{ flex: 1, aspectRatio: 1 }}
-            />
+            <View style={styles.cameraContainer}>
+                <Camera
+                    ref={ref => setCamera(ref)}
+                    style={styles.fixedRatio}
+                    type={type}
+                    ratio={'4:3'} />
+            </View>
             <Video
                 ref={video}
+                style={styles.video}
                 source={{
                     uri: record,
                 }}
@@ -65,22 +64,46 @@ export default function BarzCamera() {
                 isLooping
                 onPlaybackStatusUpdate={status => setStatus(() => status)}
             />
-
+            <View style={styles.buttons}>
+                <Button
+                    title={status.isLoaded ? 'Pause' : 'Play'}
+                    onPress={() =>
+                        status.isLoaded ? video.current.pauseAsync() : video.current.playAsync()
+                    }
+                />
+            </View>
             <Button
-                title={status.isLoaded ? 'Pause' : "Play"}
-                onPress={() => status.isLoaded ? video.current.pauseAsync() : video.current.playAsync()
-                }
-            />
-            <Button
-                title="Take Video"
-                onPress={() => takeVideo()}
-            />
-            <Button
-                title="Stop Video"
-                onPress={() => stopVideo()}
-            />
-
+                title="Flip Video"
+                onPress={() => {
+                    setType(
+                        type === CameraType.back
+                            ? CameraType.front
+                            : CameraType.back
+                    );
+                }} />
+            <Button title="Take video" onPress={() => takeVideo()} />
+            <Button title="Stop Video" onPress={() => stopVideo()} />
         </View>
-
-    )
+    );
 }
+
+const styles = StyleSheet.create({
+    cameraContainer: {
+        flex: 1,
+        flexDirection: 'row'
+    },
+    fixedRatio: {
+        flex: 1,
+        aspectRatio: 1
+    },
+    video: {
+        alignSelf: 'center',
+        width: 350,
+        height: 220,
+    },
+    buttons: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+})
