@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, Button, Image } from 'react-native';
 import { Camera, CameraType } from 'expo-camera';
 import { AVPlaybackStatus, ResizeMode, Video } from 'expo-av';
+import AudioPlayer from '../AudioPlayer';
 
 export default function BarzCamera({ navigation }) {
     const [hasAudioPermission, setHasAudioPermission] = useState(null);
@@ -83,6 +84,7 @@ export default function BarzCamera({ navigation }) {
                 }} />
             <Button title="Take video" onPress={() => takeVideo()} />
             <Button title="Stop Video" onPress={() => stopVideo()} />
+            <AudioPlayer />
         </View>
     );
 }
