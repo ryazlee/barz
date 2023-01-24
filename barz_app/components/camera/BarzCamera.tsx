@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, Button, Image } from 'react-native';
 import { Camera, CameraType } from 'expo-camera';
-import { AVPlaybackStatus, ResizeMode, Video } from 'expo-av';
+import { AVPlaybackStatus, ResizeMode, Video, Audio } from 'expo-av';
 import AudioPlayer from '../AudioPlayer';
 
 export default function BarzCamera({ navigation }) {
@@ -13,6 +13,12 @@ export default function BarzCamera({ navigation }) {
     const video = React.useRef(null);
     const [status, setStatus] = React.useState({} as AVPlaybackStatus);
 
+
+    async function playSong() {
+        const soundObject = new Audio.Sound();
+        await soundObject.loadAsync(require('../../assets/trimmed.mp3'));
+        await soundObject.playAsync();
+    }
 
     useEffect(() => {
         (async () => {
@@ -26,6 +32,7 @@ export default function BarzCamera({ navigation }) {
     }, []);
 
     const takeVideo = async () => {
+        playSong();
         if (camera) {
             const data = await camera.recordAsync({
                 maxDuration: 10
@@ -84,7 +91,6 @@ export default function BarzCamera({ navigation }) {
                 }} />
             <Button title="Take video" onPress={() => takeVideo()} />
             <Button title="Stop Video" onPress={() => stopVideo()} />
-            <AudioPlayer />
         </View>
     );
 }
