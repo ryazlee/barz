@@ -17,7 +17,6 @@ export default function BarzCamera({ navigation }) {
     const [type, setType] = useState(CameraType.front);
     const video = React.useRef(null);
     const [status, setStatus] = React.useState({} as AVPlaybackStatus);
-    const t = status.isLoaded ? '../../assets/pause.png' : '../../assets/play.png'
 
 
     async function playSong() {
