@@ -17,6 +17,7 @@ export default function BarzCamera({ navigation }) {
     const [type, setType] = useState(CameraType.front);
     const video = React.useRef(null);
     const [status, setStatus] = React.useState({} as AVPlaybackStatus);
+    const t = status.isLoaded ? '../../assets/pause.png' : '../../assets/play.png'
 
 
     async function playSong() {
@@ -88,19 +89,28 @@ export default function BarzCamera({ navigation }) {
                     } 
                     } 
                     style={[styles.secondaryButton]}>
-                        <Text>Flip{'\n'}Camera</Text>
+                        <Image
+                            source={require('../../assets/camera_flip_logo.png')}
+                            style={styles.flipCameraImageIconStyle}
+                        />
                 </TouchableOpacity>
 
                 <TouchableOpacity
                     onPress={() => takeVideo()} 
                     style={styles.takeVideoButton}>
-                        <Text>Take Video</Text>
+                        <Image
+                            source={require('../../assets/start_video.png')}
+                            style={styles.videoImageIconStyle}
+                        />
                 </TouchableOpacity>
                 
                 <TouchableOpacity
                     onPress={() => stopVideo()} 
                     style={styles.secondaryButton}>
-                        <Text>Stop Video</Text>
+                        <Image
+                            source={require('../../assets/stop_video.png')}
+                            style={styles.stopVideoImageIconStyle}
+                        />
                 </TouchableOpacity>
             </View>
             <View style={styles.secondButtons}>
@@ -109,7 +119,11 @@ export default function BarzCamera({ navigation }) {
                         status.isLoaded ? video.current.pauseAsync() : video.current.playAsync()
                     }
                     style={[styles.secondaryButton]}>
-                        <Text>{status.isLoaded ? 'Pause' : 'Play'}</Text>
+                        <Image
+                                    
+                            source={status.isLoaded ? require('../../assets/pause.png') : require('../../assets/play.png')}
+                            style={styles.playPauseImageIconStyle}
+                        />
                 </TouchableOpacity>
             </View>
         </View>
@@ -171,5 +185,33 @@ const styles = StyleSheet.create({
         backgroundColor: '#C8D9F0',
         borderWidth: 4,
         borderColor: '#2E5984',
-    }
+    },
+    videoImageIconStyle: {
+        padding: 10,
+        margin: 5,
+        height: 75,
+        width: 75,
+        resizeMode: 'stretch',
+    },
+    flipCameraImageIconStyle: {
+        padding: 10,
+        margin: 5,
+        height: 25,
+        width: 30,
+        resizeMode: 'stretch',
+    },
+    playPauseImageIconStyle: {
+        padding: 10,
+        margin: 5,
+        height: 25,
+        width: 25,
+        resizeMode: 'stretch',
+    },
+    stopVideoImageIconStyle: {
+        padding: 10,
+        margin: 5,
+        height: 50,
+        width: 50,
+        resizeMode: 'stretch',
+    },
 })
