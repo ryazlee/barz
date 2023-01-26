@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, Button, Image, TouchableOpacity, Dimensions } from 'react-native';
 import { Camera, CameraType } from 'expo-camera';
 import { AVPlaybackStatus, ResizeMode, Video, Audio } from 'expo-av';
@@ -13,7 +13,7 @@ export default function BarzCamera({ navigation }) {
     const [hasAudioPermission, setHasAudioPermission] = useState(null);
     const [hasCameraPermission, setHasCameraPermission] = useState(null);
     const [camera, setCamera] = useState(null);
-    const [record, setRecord] = useState(null);
+    const [recordUri, setRecordUri] = useState("");
     const [type, setType] = useState(CameraType.front);
     const video = React.useRef(null);
     const [status, setStatus] = React.useState({} as AVPlaybackStatus);
@@ -42,13 +42,16 @@ export default function BarzCamera({ navigation }) {
             const data = await camera.recordAsync({
                 maxDuration: 10
             })
-            setRecord(data.uri);
-            console.log(data.uri);
+            setRecordUri(data.uri);
         }
     }
 
     const stopVideo = async () => {
         camera.stopRecording();
+    }
+
+    const onPressReplayVideo = () => {
+        navigation.navigate('ReplayVideo', { record: recordUri })
     }
 
     if (hasCameraPermission === null || hasAudioPermission === null) {
@@ -66,50 +69,46 @@ export default function BarzCamera({ navigation }) {
                     type={type}
                     ratio={'4:3'} />
             </View>
-            <Video
-                ref={video}
-                style={styles.video}
-                source={{
-                    uri: record,
-                }}
-                useNativeControls
-                resizeMode={ResizeMode.CONTAIN}
-                isLooping
-                onPlaybackStatusUpdate={status => setStatus(() => status)}
-            />
+            <Text>Record: {recordUri}</Text>
+            {recordUri !== "" &&
+                <Button
+                    title="nav to video playback"
+                    onPress={onPressReplayVideo}
+                />
+            }
             <View style={styles.firstButtons}>
                 <TouchableOpacity
                     onPress={() => {
-                    setType(
-                        type === CameraType.back
-                            ? CameraType.front
-                            : CameraType.back
-                    );
-                    } 
-                    } 
+                        setType(
+                            type === CameraType.back
+                                ? CameraType.front
+                                : CameraType.back
+                        );
+                    }
+                    }
                     style={[styles.secondaryButton]}>
-                        <Image
-                            source={require('../../assets/camera_flip_logo.png')}
-                            style={styles.flipCameraImageIconStyle}
-                        />
+                    <Image
+                        source={require('../../assets/camera_flip_logo.png')}
+                        style={styles.flipCameraImageIconStyle}
+                    />
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    onPress={() => takeVideo()} 
+                    onPress={() => takeVideo()}
                     style={styles.takeVideoButton}>
-                        <Image
-                            source={require('../../assets/start_video.png')}
-                            style={styles.videoImageIconStyle}
-                        />
+                    <Image
+                        source={require('../../assets/start_video.png')}
+                        style={styles.videoImageIconStyle}
+                    />
                 </TouchableOpacity>
-                
+
                 <TouchableOpacity
-                    onPress={() => stopVideo()} 
+                    onPress={() => stopVideo()}
                     style={styles.secondaryButton}>
-                        <Image
-                            source={require('../../assets/stop_video.png')}
-                            style={styles.stopVideoImageIconStyle}
-                        />
+                    <Image
+                        source={require('../../assets/stop_video.png')}
+                        style={styles.stopVideoImageIconStyle}
+                    />
                 </TouchableOpacity>
             </View>
             <View style={styles.secondButtons}>
@@ -118,11 +117,11 @@ export default function BarzCamera({ navigation }) {
                         status.isLoaded ? video.current.pauseAsync() : video.current.playAsync()
                     }
                     style={[styles.secondaryButton]}>
-                        <Image
-                                    
-                            source={status.isLoaded ? require('../../assets/pause.png') : require('../../assets/play.png')}
-                            style={styles.playPauseImageIconStyle}
-                        />
+                    <Image
+
+                        source={status.isLoaded ? require('../../assets/pause.png') : require('../../assets/play.png')}
+                        style={styles.playPauseImageIconStyle}
+                    />
                 </TouchableOpacity>
             </View>
         </View>
@@ -145,7 +144,7 @@ const styles = StyleSheet.create({
         height: 220,
     },
     firstButtons: {
-        marginTop: config.deviceHeight-350,
+        marginTop: config.deviceHeight - 350,
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
@@ -158,7 +157,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         textAlign: 'center',
     },
-    takeVideoButton: {    
+    takeVideoButton: {
         flexDirection: 'row',
         marginTop: 5,
         width: 150,
