@@ -1,5 +1,5 @@
 import { Audio } from "expo-av";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRecordFreestyle } from "../../context/RecordFreestyleContext";
 import { Button, View } from "react-native";
 
@@ -13,11 +13,12 @@ export default function RecorderFreestylePageContent() {
 
 	const [sound, setSound] = useState<Audio.Sound | null>(null);
 	const [recording, setRecording] = useState<Audio.Recording | null>(null);
+	const [recordingUris, setRecordingUris] = useState<string[]>([]);
 
 	const playSound = async () => {
 		incrementListenCount();
 		const { sound } = await Audio.Sound.createAsync(
-			require("../pages/assets/beat.mp3")
+			require("../../assets/beat.mp3")
 		);
 		setSound(sound);
 		await sound.playAsync();
@@ -55,29 +56,51 @@ export default function RecorderFreestylePageContent() {
 		if (!recording) return;
 		await recording.stopAndUnloadAsync();
 		const uri = recording.getURI();
-		// save these locally and display 2
+		if (uri) {
+			setRecordingUris((prev) => [...prev, uri]);
+		}
 		setRecording(null);
 		stopSound();
 	}
 
+	const shouldAllowRecording = useMemo(
+		() => !recording && recordAttempts < 2,
+		[recording, recordAttempts]
+	);
+
+	const shouldAllowSound = useMemo(
+		() => !sound && recordAttempts < 2 && listenCount < 2,
+		[sound, recordAttempts, listenCount]
+	);
+
 	return (
 		<View style={{ marginTop: 100 }}>
-			{sound ? (
-				<Button title="Stop Sound" onPress={stopSound} />
-			) : (
+			{shouldAllowSound ? (
 				<Button title="Play Sound" onPress={playSound} />
+			) : (
+				<Button title="Stop Sound" onPress={stopSound} />
 			)}
 
-			{recording ? (
-				<Button title="Stop Recording" onPress={stopRecording} />
-			) : (
+			{shouldAllowRecording ? (
 				<Button title="Start Recording" onPress={startRecording} />
+			) : (
+				<Button title="Stop Recording" onPress={stopRecording} />
 			)}
 
 			{/* Display attempt and listen counts */}
 			<View style={{ marginTop: 20 }}>
 				<Button title={`Record Attempts: ${recordAttempts}`} disabled />
 				<Button title={`Listens: ${listenCount}`} disabled />
+			</View>
+
+			{/* Display recorded URIs */}
+			<View style={{ marginTop: 20 }}>
+				{recordingUris.map((uri, index) => (
+					<Button
+						key={index}
+						title={`Recording ${index + 1}: ${uri}`}
+					/>
+				))}
 			</View>
 		</View>
 	);
